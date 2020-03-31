@@ -1,56 +1,61 @@
 import sys
 import requests
+import json
 
-URL = "https://jsonplaceholder.typicode.com/posts"
-r = requests.get(URL)
+def send_get_request(URL):
+    r = requests.get(URL)
+    return r.json()
 
-posts = r.json()
+def send_post_request(URL, data):
+    r = requests.post(URL, data)
+    return r.json()
 
-print("1. Post titles:")
-payload = {}
+def send_put_request(URL, data):
+    r = requests.put(URL, data)
+    return r.json()
 
-count = 1
-for post in posts:
-    print('Title {0} {1}'.format(count, post['title']))
-    if post['id'] == 14:
-        payload = post
-    count += 1
+def find_posts_by_id(posts, id_key, id):
+    return [post for post in posts if(post[id_key] == id)]
 
-URL = "https://jsonplaceholder.typicode.com/users/5"
-r = requests.get(URL)
+def print_operation_output(index, line_message, posts_list={}):
+    print('{0}. {1}'.format(index, line_message))
+    count = 1
+    for post in posts_list:
+        print('     Title {0} {1}'.format(count, post['title']))
+        count += 1
 
-user = r.json()
+API_ENDPOINTS = {
+    'posts': 'https://jsonplaceholder.typicode.com/posts',
+    'user': 'https://jsonplaceholder.typicode.com/users/5',
+    'post': 'https://jsonplaceholder.typicode.com/posts/14'
+}
 
+# operation 1
+posts = send_get_request(API_ENDPOINTS['posts'])
+print_operation_output(1, 'Post titles:', posts)
+
+# operation 2
+user = send_get_request(API_ENDPOINTS['user'])
 email = user['email']
+print_operation_output(2, 'Email: {0}'.format(email))
 
-print("2. Email: {0}".format(email))
-
-URL = "https://jsonplaceholder.typicode.com/posts"
-newPayload = {
+# operation 3
+new_post = {
     'userId': '5',
     'id': '555',
     'title': 'I passed the test!',
     'body': 'I passed the test!'
 }
-r = requests.post(URL)
+post_id = send_post_request(API_ENDPOINTS['posts'], new_post)
+print_operation_output(3, 'New post id:{0}'.format(post_id['id']))
 
-pid = r.json()
+# oepration 4
+posts_uid_5 = find_posts_by_id(posts, 'userId', 5)
+print_operation_output(4, 'Post titles by user 5:', posts_uid_5)
 
-print("3. New post id: {0}".format(pid))
-
-print("4. Post titles by user 5:")
-
-count = 1
-for post in posts:
-    if post["userId"] == 5:
-        print('Title {0} {1}'.format(count, post['title']))
-        count += 1
-
-URL = "https://jsonplaceholder.typicode.com/posts/14"
-payload["title"] = "I passed the test!"
-r = requests.put(URL, payload)
-
-response = r.json()
-print("5. Response:")
-print(response)
-
+# operation 5
+post_pid_14 = find_posts_by_id(posts, 'id', 14)[0]
+post_pid_14['title'] = 'I passed the test!'
+response = send_put_request(API_ENDPOINTS['post'], post_pid_14)
+print_operation_output(5, 'Response:')
+print(json.dumps(response, indent=4))
