@@ -3,16 +3,35 @@ import requests
 import json
 
 def send_get_request(URL):
-    r = requests.get(URL)
-    return r.json()
+    result = {}
+    try:
+        r = requests.get(URL)
+        r.raise_for_status()
+        result = r.json()
+    except requests.exceptions.HTTPError as err:
+        raise SystemExit(err)
+
+    return result
 
 def send_post_request(URL, data):
-    r = requests.post(URL, data)
-    return r.json()
+    result = {}
+    try:
+        r = requests.post(URL, data)
+        r.raise_for_status()
+        result = r.json()
+    except requests.exceptions.HTTPError as err:
+        raise SystemExit(err)
+    return result
 
 def send_put_request(URL, data):
-    r = requests.put(URL, data)
-    return r.json()
+    result = {}
+    try:
+        r = requests.put(URL, data)
+        r.raise_for_status()
+        result = r.json()
+    except requests.exceptions.HTTPError as err:
+        raise SystemExit(err)
+    return result
 
 def find_posts_by_id(posts, id_key, id):
     return [post for post in posts if(post[id_key] == id)]
